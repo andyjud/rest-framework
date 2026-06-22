@@ -1,0 +1,70 @@
+{% extends 'layouts/page.html' %}
+
+{% block content %} 
+
+<h1>Comments</h1>
+
+<div x-data="commentsComponent()" x-init="fetchComments()">
+
+    <div class="flex flex-col gap-2">
+        <template x-for="comment in comments" :key="comment.id">
+            <a :href="'/comment/' + comment.id + '/'" class="flex gap-4 p-3 border rounded-2xl hover:bg-neutral-100">
+                <div class="rounded-full size-12 overflow-hidden">
+                    <img :src="comment.author.avatar" class="w-full h-full object-cover" />
+                </div>
+                <div>
+                    <div class="flex gap-2">
+                        <span x-show="comment.author.displayname" x-text="comment.author.displayname"></span>
+                        <span x-text="'@' + comment.author.username" class="font-bold"></span>
+                    </div>
+                    <span x-text="comment.body"></span>
+                </div>
+            </a>
+        </template>
+    </div>
+
+    <div class="mt-4">
+        <form @submit.prevent="addComment" class="flex gap-2">
+            <input type="text" x-model="newComment" placeholder="Write a comment..." />
+            <button type="submit">Post</button>
+        </form>
+    </div>
+
+</div>
+
+<script>
+function commentsComponent() {
+    return {
+        comments: [],
+        newComment: '', 
+
+        fetchComments() {
+            fetch('/api/comments/')
+                .then(res => res.json())
+                .then(data => {
+                    this.comments = data;
+                });
+        },
+
+        addComment() {
+            fetch('/api/comments/add/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    body: this.newComment,
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.comments.push(data);
+                this.newComment = '';      
+            });
+        }
+    }
+}
+</script>
+
+{% endblock %}

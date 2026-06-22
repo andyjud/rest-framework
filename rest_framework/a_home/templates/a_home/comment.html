@@ -1,0 +1,34 @@
+{% extends 'layouts/page.html' %}
+
+{% block content %}
+
+<div x-data="commentDetail()" x-init="fetchComment()" class="max-w-lg mx-auto px-4">
+
+    <div class="flex flex-col items-center text-center">
+        <img class="w-36 h-36 rounded-full object-cover mb-4" :src="comment.author.avatar"/>
+        <h1 x-text="comment.author.displayname"></h1>
+        <div x-text="'@' + comment.author.username" class="text-gray-400 mb-2 -mt-3" ></div>
+        <div x-text="comment.body" class="mt-8 w-full text-lg p-6 border rounded-2xl" ></div>
+    </div>
+
+</div>
+
+<script>
+function commentDetail() {
+    return {
+        comment: null,
+
+        fetchComment() {
+            const id = window.location.pathname.split('/').at(-2);
+
+            fetch(`/api/comment/${id}/`)
+                .then(res => res.json())
+                .then(data => {
+                    this.comment = data;
+                });
+        }
+    }
+}
+</script>
+
+{% endblock %}
